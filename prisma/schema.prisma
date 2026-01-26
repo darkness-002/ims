@@ -1,0 +1,108 @@
+// This is your Prisma schema file.
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum ProgramType {
+  GRADUATE
+  UNDERGRADUATE
+}
+
+// ============================================================================
+// MODELS - INSTITUTION HIERARCHY
+// ============================================================================
+
+model Institution {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  code      String   @unique
+  address   String?
+  phone     String?
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  shifts       Shift[]
+  programs     Program[]
+  departments  Department[]
+
+  @@map("institutions")
+}
+
+model Shift {
+  id            String   @id @default(cuid())
+  name          String
+  startTime     String   // e.g., "09:00"
+  endTime       String   // e.g., "17:00"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Foreign Key
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  @@unique([institutionId, name])
+  @@map("shifts")
+}
+
+model Program {
+  id        String      @id @default(cuid())
+  name      String
+  type      ProgramType // GRADUATE or UNDERGRADUATE
+  code      String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  // Foreign Key
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  @@unique([institutionId, name])
+  @@map("programs")
+}
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String
+  code      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign Key
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  // Relations
+  teachers  Teacher[]
+
+  @@unique([institutionId, name])
+  @@map("departments")
+}
+
+model Teacher {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign Key
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@map("teachers")
+}

@@ -1,0 +1,176 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, Users, Plus, Building2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DeleteDialog } from "@/components/shared";
+import { getDepartmentById, getTeachersByDepartment, getInstitutionById } from "@/lib/mock-data";
+import { Department, Teacher, TeacherInput, Institution } from "@/lib/types";
+import { TeacherFormDialog, TeachersTable } from "@/components/teachers";
+
+export default function DepartmentDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const departmentId = params.id as string;
+
+  // Load data using useMemo
+  const initialData = useMemo(() => {
+    const deptData = getDepartmentById(departmentId);
+    const instData = deptData ? getInstitutionById(deptData.institutionId) : null;
+    return {
+      department: deptData || null,
+      institution: instData || null,
+      teachers: deptData ? getTeachersByDepartment(departmentId) : [],
+    };
+  }, [departmentId]);
+
+  // Data state
+  const [department] = useState<Department | null>(initialData.department);
+  const [institution] = useState<Institution | null>(initialData.institution);
+  const [teachers, setTeachers] = useState<Teacher[]>(initialData.teachers);
+
+  // Dialog states
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+
+  if (!department) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <p className="text-muted-foreground">Department not found</p>
+      </div>
+    );
+  }
+
+  // Handlers
+  const handleCreate = () => {
+    setSelectedTeacher(null);
+    setFormDialogOpen(true);
+  };
+
+  const handleEdit = (teacher: Teacher) => {
+    setSelectedTeacher(teacher);
+    setFormDialogOpen(true);
+  };
+
+  const handleDelete = (teacher: Teacher) => {
+    setSelectedTeacher(teacher);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleFormSubmit = (data: TeacherInput) => {
+    if (selectedTeacher) {
+      setTeachers((prev) =>
+        prev.map((t) =>
+          t.id === selectedTeacher.id ? { ...t, ...data, updatedAt: new Date() } : t
+        )
+      );
+    } else {
+      const newTeacher: Teacher = {
+        id: `teacher-${Date.now()}`,
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      setTeachers((prev) => [...prev, newTeacher]);
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedTeacher) {
+      setTeachers((prev) => prev.filter((t) => t.id !== selectedTeacher.id));
+      setDeleteDialogOpen(false);
+      setSelectedTeacher(null);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header with back button */}
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={() => router.back()}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-purple-100 p-2">
+            <Users className="h-6 w-6 text-purple-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">{department.name}</h1>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              {department.code && (
+                <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium">
+                  {department.code}
+                </span>
+              )}
+              {institution && (
+                <Link
+                  href={`/institutions/${institution.id}`}
+                  className="flex items-center gap-1 text-sm hover:underline"
+                >
+                  <Building2 className="h-3 w-3" />
+                  {institution.name}
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Card */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total Teachers
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{teachers.length}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Teachers Section */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Teachers
+          </CardTitle>
+          <Button onClick={handleCreate}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Teacher
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <TeachersTable
+            teachers={teachers}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Dialogs */}
+      <TeacherFormDialog
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        teacher={selectedTeacher}
+        departmentId={departmentId}
+        onSubmit={handleFormSubmit}
+      />
+
+      <DeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Teacher"
+        description={`Are you sure you want to delete ${selectedTeacher?.firstName} ${selectedTeacher?.lastName}? This action cannot be undone.`}
+        onConfirm={handleConfirmDelete}
+      />
+    </div>
+  );
+}
