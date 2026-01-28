@@ -18,12 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Program, Subject } from "@/lib/types";
-import { addSubjectToCurriculum, removeSubjectFromCurriculum } from "@/lib/actions/curriculum";
+import { addSubjectToCurriculum, removeSubjectFromCurriculum } from "@/app/actions/curriculum";
 
 // Define the shape of the curriculum data
 interface ProgramSubjectWithSubject {

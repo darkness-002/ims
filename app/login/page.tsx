@@ -15,7 +15,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Building2, GraduationCap, User, ShieldCheck } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function LoginPage() {
   const router = useRouter();

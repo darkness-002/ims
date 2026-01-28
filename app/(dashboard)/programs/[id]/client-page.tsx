@@ -2,19 +2,28 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, GraduationCap, Building2, Pencil, BookOpen, Layers } from "lucide-react";
+import { ArrowLeft, GraduationCap, Pencil, BookOpen, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Program, ProgramInput, Institution, Subject } from "@/lib/types";
 import { ProgramFormDialog } from "@/components/programs";
 import { ProgramCurriculum } from "@/components/programs/program-curriculum";
-import { updateProgram } from "@/lib/actions/programs";
+import { updateProgram } from "@/app/actions/programs";
+
+interface ProgramSubjectWithSubject {
+  id: string;
+  programId: string;
+  subjectId: string;
+  termNumber: number;
+  isElective: boolean;
+  subject: Subject;
+}
 
 interface ProgramDetailClientPageProps {
   program: Program;
   institution: Institution | null;
-  curriculum: any[]; // Using any to avoid complex type import for now
+  curriculum: ProgramSubjectWithSubject[];
   allSubjects: Subject[];
 }
 

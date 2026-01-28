@@ -17,7 +17,7 @@ import {
   createShift,
   updateShift,
   deleteShift,
-} from "@/lib/actions/shifts";
+} from "@/app/actions/shifts";
 
 interface ShiftsClientPageProps {
   shifts: (Shift & { institutionName: string })[];

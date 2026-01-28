@@ -1,18 +1,13 @@
-
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { PrismaClient } from '@prisma/client';
 import { BatchInput } from '@/lib/types';
-
-const prisma = new PrismaClient();
+import { batchService } from '@/lib/services/batch.service';
 
 export async function createBatch(data: BatchInput) {
   try {
-    const batch = await prisma.batch.create({ data });
-    // We don't have a single "batches" page, usually inside department dashboard
-    // We'll revalidate the department dashboard path or where it's used
-    revalidatePath('/dashboard/department/batches'); 
+    const batch = await batchService.createBatch(data);
+    revalidatePath('/dashboard/department/batches');
     return { success: true, batch };
   } catch (error) {
     console.error('Failed to create batch:', error);
@@ -22,7 +17,7 @@ export async function createBatch(data: BatchInput) {
 
 export async function updateBatch(id: string, data: BatchInput) {
   try {
-    const batch = await prisma.batch.update({ where: { id }, data });
+    const batch = await batchService.updateBatch(id, data);
     revalidatePath('/dashboard/department/batches');
     return { success: true, batch };
   } catch (error) {
@@ -33,7 +28,7 @@ export async function updateBatch(id: string, data: BatchInput) {
 
 export async function deleteBatch(id: string) {
   try {
-    await prisma.batch.delete({ where: { id } });
+    await batchService.deleteBatch(id);
     revalidatePath('/dashboard/department/batches');
     return { success: true };
   } catch (error) {

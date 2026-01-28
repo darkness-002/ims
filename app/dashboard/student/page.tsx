@@ -1,16 +1,13 @@
 "use client";
 
-import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
   BookOpen,
-  CalendarDays,
   Trophy,
   Clock,
   CheckCircle,
-  AlertCircle
 } from "lucide-react";
 
 // Mock Student Data based on the new Schema

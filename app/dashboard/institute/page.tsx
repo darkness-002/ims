@@ -8,7 +8,6 @@ import {
   Users,
   GraduationCap,
   Clock,
-  UserPlus,
 } from "lucide-react";
 import { getDepartments, getPrograms, getTeachers, getTotalStudents } from "@/lib/data";
 

@@ -2,14 +2,12 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { PrismaClient } from '@prisma/client';
 import { StudentInput } from '@/lib/types';
-
-const prisma = new PrismaClient();
+import { studentService } from '@/lib/services/student.service';
 
 export async function createStudent(data: StudentInput) {
   try {
-    await prisma.student.create({ data });
+    await studentService.createStudent(data);
     revalidatePath('/dashboard/department/students');
     return { success: true };
   } catch (error) {
@@ -20,7 +18,7 @@ export async function createStudent(data: StudentInput) {
 
 export async function updateStudent(id: string, data: StudentInput) {
   try {
-    await prisma.student.update({ where: { id }, data });
+    await studentService.updateStudent(id, data);
     revalidatePath('/dashboard/department/students');
     return { success: true };
   } catch (error) {
@@ -31,7 +29,7 @@ export async function updateStudent(id: string, data: StudentInput) {
 
 export async function deleteStudent(id: string) {
   try {
-    await prisma.student.delete({ where: { id } });
+    await studentService.deleteStudent(id);
     revalidatePath('/dashboard/department/students');
     return { success: true };
   } catch (error) {

@@ -14,7 +14,7 @@ import {
   createInstitution,
   updateInstitution,
   deleteInstitution,
-} from "@/lib/actions/institutions";
+} from "@/app/actions/institutions";
 
 interface InstitutionsClientPageProps {
   institutions: Institution[];

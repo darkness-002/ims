@@ -17,7 +17,6 @@ export default async function DepartmentBatchesPage() {
     <DepartmentBatchesClientPage
       batches={batches}
       programs={programs}
-      departmentId={myDept.id}
       departmentName={myDept.name}
     />
   );

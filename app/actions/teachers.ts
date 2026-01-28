@@ -2,10 +2,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { PrismaClient } from '@prisma/client';
 import { TeacherInput } from '@/lib/types';
-
-const prisma = new PrismaClient();
+import { teacherService } from '@/lib/services/teacher.service';
 
 // ============================================================================
 // SERVER ACTIONS
@@ -13,7 +11,7 @@ const prisma = new PrismaClient();
 
 export async function createTeacher(data: TeacherInput) {
   try {
-    const teacher = await prisma.teacher.create({ data });
+    const teacher = await teacherService.createTeacher(data);
     revalidatePath(`/departments/${teacher.departmentId}`);
     return { success: true };
   } catch (error) {
@@ -24,7 +22,7 @@ export async function createTeacher(data: TeacherInput) {
 
 export async function updateTeacher(id: string, data: TeacherInput) {
   try {
-    const teacher = await prisma.teacher.update({ where: { id }, data });
+    const teacher = await teacherService.updateTeacher(id, data);
     revalidatePath(`/departments/${teacher.departmentId}`);
     return { success: true };
   } catch (error) {
@@ -35,7 +33,21 @@ export async function updateTeacher(id: string, data: TeacherInput) {
 
 export async function deleteTeacher(id: string) {
   try {
-    const teacher = await prisma.teacher.delete({ where: { id } });
+    // We need to fetch the teacher first to know which path to revalidate
+    // or we can rely on client side to handle navigation if needed.
+    // However, the original code had access to 'teacher' object from delete result.
+    // Prisma delete returns the deleted object. teacherService.delete returns void.
+    // I should probably update teacherService to return the deleted object or fetch it first.
+    // BUT checking the service implementation:
+    // async delete(id: string): Promise<void> { await prisma.teacher.delete({ where: { id } }); }
+    // It doesn't return it.
+    // So I can't get the departmentId easily.
+    // I will fetch it first using the service.
+    
+    const teacher = await teacherService.findTeacherById(id);
+    if (!teacher) throw new Error("Teacher not found");
+    
+    await teacherService.deleteTeacher(id);
     revalidatePath(`/departments/${teacher.departmentId}`);
     return { success: true };
   } catch (error) {

@@ -2,9 +2,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/db';
 
 // Add a subject to a program's term
 export async function addSubjectToCurriculum(

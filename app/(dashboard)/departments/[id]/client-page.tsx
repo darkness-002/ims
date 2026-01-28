@@ -12,7 +12,7 @@ import {
   createTeacher,
   updateTeacher,
   deleteTeacher,
-} from "@/lib/actions/teachers";
+} from "@/app/actions/teachers";
 
 interface DepartmentDetailClientPageProps {
   department: Department;

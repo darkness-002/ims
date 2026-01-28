@@ -1,25 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Plus } from "lucide-react";
+import { Users } from "lucide-react";
 import { Batch, BatchInput, Program } from "@/lib/types";
 import { PageHeader, DeleteDialog } from "@/components/shared";
 import { BatchFormDialog } from "@/components/batches/batch-form-dialog";
 import { BatchesTable } from "@/components/batches/batches-table";
-import { Button } from "@/components/ui/button";
-import { createBatch, updateBatch, deleteBatch } from "@/lib/actions/batches";
+import { createBatch, updateBatch, deleteBatch } from "@/app/actions/batches";
 
 interface DepartmentBatchesClientPageProps {
   batches: Batch[];
   programs: Program[];
-  departmentId: string;
   departmentName: string;
 }
 
 export default function DepartmentBatchesClientPage({
   batches,
   programs,
-  departmentId,
   departmentName,
 }: DepartmentBatchesClientPageProps) {
   const [formDialogOpen, setFormDialogOpen] = useState(false);

@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { GraduationCap, Plus } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 import { Program, ProgramInput } from "@/lib/types";
 import { PageHeader, DeleteDialog } from "@/components/shared";
 import { ProgramFormDialog, ProgramsTable } from "@/components/programs";
-import { Button } from "@/components/ui/button";
-import { createProgram, updateProgram, deleteProgram } from "@/lib/actions/programs";
+import { createProgram, updateProgram, deleteProgram } from "@/app/actions/programs";
 
 interface DepartmentProgramsClientPageProps {
   programs: Program[];

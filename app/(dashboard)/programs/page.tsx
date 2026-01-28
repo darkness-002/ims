@@ -1,7 +1,6 @@
 
 import { getInstitutions, getPrograms } from '@/lib/data';
 import ProgramsClientPage from './client-page';
-import { Program } from '@/lib/types';
 
 export default async function ProgramsPage() {
   const institutions = await getInstitutions();

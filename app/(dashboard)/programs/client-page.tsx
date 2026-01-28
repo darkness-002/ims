@@ -17,7 +17,7 @@ import {
   createProgram,
   updateProgram,
   deleteProgram,
-} from "@/lib/actions/programs";
+} from "@/app/actions/programs";
 
 interface ProgramsClientPageProps {
   programs: (Program & { institutionName: string })[];

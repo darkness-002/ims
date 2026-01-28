@@ -20,7 +20,7 @@ import {
   createDepartment,
   updateDepartment,
   deleteDepartment,
-} from "@/lib/actions/departments";
+} from "@/app/actions/departments";
 
 interface DepartmentsClientPageProps {
   departments: (Department & { institutionName: string })[];

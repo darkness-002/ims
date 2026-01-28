@@ -78,7 +78,6 @@ export function StudentFormDialog({
               <FormField
                 control={form.control}
                 name="firstName"
-                rules={{ required: "First name is required" }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>First Name *</FormLabel>
@@ -93,7 +92,6 @@ export function StudentFormDialog({
               <FormField
                 control={form.control}
                 name="lastName"
-                rules={{ required: "Last name is required" }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Last Name *</FormLabel>
@@ -109,7 +107,6 @@ export function StudentFormDialog({
             <FormField
               control={form.control}
               name="rollNumber"
-              rules={{ required: "Roll Number is required" }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Roll Number *</FormLabel>
@@ -124,7 +121,6 @@ export function StudentFormDialog({
             <FormField
               control={form.control}
               name="batchId"
-              rules={{ required: "Batch is required" }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Batch/Cohort *</FormLabel>

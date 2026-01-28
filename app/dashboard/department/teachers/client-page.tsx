@@ -5,8 +5,7 @@ import { UserPlus } from "lucide-react";
 import { Teacher, TeacherInput } from "@/lib/types";
 import { PageHeader, DeleteDialog } from "@/components/shared";
 import { TeacherFormDialog, TeachersTable } from "@/components/teachers";
-import { Button } from "@/components/ui/button";
-import { createTeacher, updateTeacher, deleteTeacher } from "@/lib/actions/teachers";
+import { createTeacher, updateTeacher, deleteTeacher } from "@/app/actions/teachers";
 
 interface DepartmentTeachersClientPageProps {
   teachers: Teacher[];

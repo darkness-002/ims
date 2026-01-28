@@ -17,7 +17,6 @@ export default async function DepartmentStudentsPage() {
     <DepartmentStudentsClientPage
       students={students}
       batches={batches}
-      departmentId={myDept.id}
       departmentName={myDept.name}
       institutionId={myDept.institutionId}
     />

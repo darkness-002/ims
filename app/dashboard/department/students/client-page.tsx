@@ -6,13 +6,11 @@ import { Student, StudentInput, Batch } from "@/lib/types";
 import { PageHeader, DeleteDialog } from "@/components/shared";
 import { StudentFormDialog } from "@/components/students/student-form-dialog";
 import { StudentsTable } from "@/components/students/students-table";
-import { Button } from "@/components/ui/button";
-import { createStudent, updateStudent, deleteStudent } from "@/lib/actions/students";
+import { useStudent } from "@/lib/hooks/use-student";
 
 interface DepartmentStudentsClientPageProps {
   students: Student[];
   batches: Batch[];
-  departmentId: string;
   departmentName: string;
   institutionId: string;
 }
@@ -20,13 +18,14 @@ interface DepartmentStudentsClientPageProps {
 export default function DepartmentStudentsClientPage({
   students,
   batches,
-  departmentId,
   departmentName,
   institutionId,
 }: DepartmentStudentsClientPageProps) {
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+
+  const { create, update, remove } = useStudent();
 
   const handleCreate = () => {
     setSelectedStudent(null);
@@ -45,15 +44,15 @@ export default function DepartmentStudentsClientPage({
 
   const handleFormSubmit = async (data: StudentInput) => {
     if (selectedStudent) {
-      await updateStudent(selectedStudent.id, data);
+      await update(selectedStudent.id, data);
     } else {
-      await createStudent(data);
+      await create(data);
     }
   };
 
   const handleConfirmDelete = async () => {
     if (selectedStudent) {
-      await deleteStudent(selectedStudent.id);
+      await remove(selectedStudent.id);
       setDeleteDialogOpen(false);
       setSelectedStudent(null);
     }

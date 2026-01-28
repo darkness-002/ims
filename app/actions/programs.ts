@@ -2,10 +2,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { PrismaClient } from '@prisma/client';
 import { ProgramInput } from '@/lib/types';
-
-const prisma = new PrismaClient();
+import { programService } from '@/lib/services/program.service';
 
 // ============================================================================
 // SERVER ACTIONS
@@ -13,7 +11,7 @@ const prisma = new PrismaClient();
 
 export async function createProgram(data: ProgramInput) {
   try {
-    await prisma.program.create({ data });
+    await programService.createProgram(data);
     revalidatePath('/programs');
     return { success: true };
   } catch (error) {
@@ -24,7 +22,7 @@ export async function createProgram(data: ProgramInput) {
 
 export async function updateProgram(id: string, data: ProgramInput) {
   try {
-    await prisma.program.update({ where: { id }, data });
+    await programService.updateProgram(id, data);
     revalidatePath('/programs');
     return { success: true };
   } catch (error) {
@@ -35,7 +33,7 @@ export async function updateProgram(id: string, data: ProgramInput) {
 
 export async function deleteProgram(id: string) {
   try {
-    await prisma.program.delete({ where: { id } });
+    await programService.deleteProgram(id);
     revalidatePath('/programs');
     return { success: true };
   } catch (error) {
