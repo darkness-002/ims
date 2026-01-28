@@ -9,7 +9,8 @@ export default async function DashboardPage() {
   // Calculate stats from fetched data
   const totalInstitutions = institutions.length;
   const totalPrograms = institutions.reduce(
-    (acc, inst) => acc + (inst.programs?.length || 0),
+    (acc, inst) => 
+      acc + (inst.departments?.reduce((dAcc, dept) => dAcc + (dept.programs?.length || 0), 0) || 0),
     0
   );
   const totalDepartments = institutions.reduce(

@@ -1,5 +1,3 @@
-// This is your Prisma schema file.
-// Learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -10,18 +8,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================================================
-// ENUMS
-// ============================================================================
+
 
 enum ProgramType {
-  GRADUATE
-  UNDERGRADUATE
+  SEMESTER_BASED // e.g. BSCS (8 Semesters)
+  ANNUAL_BASED // e.g. FSc (2 Years)
 }
 
-// ============================================================================
-// MODELS - INSTITUTION HIERARCHY
-// ============================================================================
+enum StudentStatus {
+  ACTIVE
+  GRADUATED
+  DROPPED
+  SUSPENDED
+}
+
+enum ExamType {
+  MID_TERM
+  FINAL_TERM
+  QUIZ
+  ASSIGNMENT
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
 
 model Institution {
   id        String   @id @default(cuid())
@@ -30,79 +44,274 @@ model Institution {
   address   String?
   phone     String?
   email     String?
+  website   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
-  shifts       Shift[]
-  programs     Program[]
-  departments  Department[]
+  // Hierarchy
+  departments Department[]
+  shifts      Shift[]
+  subjects    Subject[] // Global pool of subjects for this institution
+  students    Student[]
+  teachers    Teacher[]
 
   @@map("institutions")
 }
 
-model Shift {
+model Department {
   id            String   @id @default(cuid())
   name          String
-  startTime     String   // e.g., "09:00"
-  endTime       String   // e.g., "17:00"
+  code          String?
+  institutionId String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  // Foreign Key
-  institutionId String
-  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  institution Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
 
-  @@unique([institutionId, name])
-  @@map("shifts")
-}
-
-model Program {
-  id        String      @id @default(cuid())
-  name      String
-  type      ProgramType // GRADUATE or UNDERGRADUATE
-  code      String?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-
-  // Foreign Key
-  institutionId String
-  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
-
-  @@unique([institutionId, name])
-  @@map("programs")
-}
-
-model Department {
-  id        String   @id @default(cuid())
-  name      String
-  code      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Foreign Key
-  institutionId String
-  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
-
-  // Relations
-  teachers  Teacher[]
+  programs Program[]
+  teachers Teacher[]
 
   @@unique([institutionId, name])
   @@map("departments")
 }
 
+// ============================================================================
+// 2. ACADEMIC DEFINITION (Templates)
+// ============================================================================
+
+model Program {
+  id           String      @id @default(cuid())
+  name         String // e.g. "BS Computer Science"
+  code         String? // e.g. "BSCS"
+  type         ProgramType // Defines if it uses Terms (Semesters) or Years
+  duration     Int // Total terms/years (e.g. 8 for BSCS, 2 for FSc)
+  departmentId String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  // Curriculum Definition
+  curriculum ProgramSubject[]
+
+  // Execution
+  batches Batch[]
+
+  @@unique([departmentId, name])
+  @@map("programs")
+}
+
+model Subject {
+  id            String   @id @default(cuid())
+  name          String // e.g. "Introduction to Computing"
+  code          String // e.g. "CS-101"
+  credits       Int      @default(3)
+  institutionId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  institution Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  // Usage in Curriculum
+  programs ProgramSubject[]
+
+  // Usage in Execution (Actual classes taught)
+  allocations SubjectAllocation[]
+
+  @@unique([institutionId, code])
+  @@map("subjects")
+}
+
+// Junction table: Which subjects are taught in which term of a program?
+model ProgramSubject {
+  id         String   @id @default(cuid())
+  programId  String
+  subjectId  String
+  termNumber Int // The Semester (1-8) or Year (1-2) this subject is taught
+  isElective Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([programId, subjectId, termNumber])
+  @@map("program_subjects")
+}
+
+// ============================================================================
+// 3. HUMAN RESOURCES
+// ============================================================================
+
 model Teacher {
+  id            String   @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String?  @unique
+  phone         String?
+  departmentId  String
+  institutionId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  department  Department  @relation(fields: [departmentId], references: [id])
+  institution Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  allocations SubjectAllocation[]
+
+  @@map("teachers")
+}
+
+// ============================================================================
+// 4. ACADEMIC EXECUTION (Batches, Sections, Enrollments)
+// ============================================================================
+
+model Batch {
   id        String   @id @default(cuid())
-  firstName String
-  lastName  String
-  email     String?
-  phone     String?
+  name      String // e.g. "Fall 2025", "2023-2025"
+  startDate DateTime
+  endDate   DateTime?
+  isActive  Boolean  @default(true)
+  programId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Foreign Key
-  departmentId String
-  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
 
-  @@map("teachers")
+  sections Section[]
+  students Student[]
+
+  @@unique([programId, name])
+  @@map("batches")
+}
+
+model Shift {
+  id            String   @id @default(cuid())
+  name          String // "Morning", "Evening", "Weekend"
+  startTime     String // "08:00"
+  endTime       String // "14:00"
+  institutionId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  institution Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  sections Section[]
+
+  @@unique([institutionId, name])
+  @@map("shifts")
+}
+
+model Section {
+  id          String   @id @default(cuid())
+  name        String // "Section A", "G1"
+  termNumber  Int // The current term this section is in (e.g. Term 1)
+  batchId     String
+  shiftId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  batch Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  shift Shift @relation(fields: [shiftId], references: [id])
+
+  // Who is in this section?
+  students StudentSection[]
+
+  // What is being taught in this section?
+  allocations SubjectAllocation[]
+
+  @@unique([batchId, name, termNumber]) // Unique section per batch per term
+  @@map("sections")
+}
+
+model Student {
+  id            String        @id @default(cuid())
+  firstName     String
+  lastName      String
+  rollNumber    String
+  email         String?       @unique
+  phone         String?
+  status        StudentStatus @default(ACTIVE)
+  institutionId String
+  batchId       String // The batch defines their program and intake year
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  institution Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  batch       Batch       @relation(fields: [batchId], references: [id])
+
+  // Term-wise history
+  sections StudentSection[]
+  results  Result[]
+
+  @@unique([institutionId, rollNumber])
+  @@map("students")
+}
+
+
+model StudentSection {
+  id        String   @id @default(cuid())
+  studentId String
+  sectionId String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  section Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, sectionId])
+  @@map("student_sections")
+}
+
+
+model SubjectAllocation {
+  id        String   @id @default(cuid())
+  sectionId String
+  subjectId String
+  teacherId String? // Optional: A subject might not have a teacher assigned yet
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  section Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id])
+  teacher Teacher? @relation(fields: [teacherId], references: [id])
+
+  exams Exam[]
+
+  @@unique([sectionId, subjectId])
+  @@map("subject_allocations")
+}
+
+model Exam {
+  id                  String   @id @default(cuid())
+  title               String // "Midterm Exam", "Final Exam", "Quiz 1"
+  type                ExamType
+  totalMarks          Float
+  date                DateTime
+  subjectAllocationId String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Links to the specific class instance (Subject + Section)
+  subjectAllocation SubjectAllocation @relation(fields: [subjectAllocationId], references: [id], onDelete: Cascade)
+
+  results Result[]
+
+  @@map("exams")
+}
+
+model Result {
+  id            String   @id @default(cuid())
+  marksObtained Float
+  examId        String
+  studentId     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  exam    Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, studentId]) // A student gets one result per exam
+  @@map("results")
 }

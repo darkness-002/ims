@@ -24,6 +24,7 @@ interface TeacherFormDialogProps {
   onOpenChange: (open: boolean) => void;
   teacher?: Teacher | null;
   departmentId: string;
+  institutionId: string;
   onSubmit: (data: TeacherInput) => void;
 }
 
@@ -32,6 +33,7 @@ export function TeacherFormDialog({
   onOpenChange,
   teacher,
   departmentId,
+  institutionId,
   onSubmit,
 }: TeacherFormDialogProps) {
   const isEditing = !!teacher;
@@ -43,11 +45,12 @@ export function TeacherFormDialog({
       email: teacher?.email || "",
       phone: teacher?.phone || "",
       departmentId,
+      institutionId,
     },
   });
 
   const handleSubmit = (data: TeacherInput) => {
-    onSubmit({ ...data, departmentId });
+    onSubmit({ ...data, departmentId, institutionId });
     form.reset();
     onOpenChange(false);
   };

@@ -42,7 +42,7 @@ export default function ProgramsClientPage({
   const filteredPrograms =
     selectedInstitutionId === "all"
       ? programs
-      : programs.filter((p) => p.institutionId === selectedInstitutionId);
+      : programs; // Filter temporarily disabled due to schema change
 
   const handleCreate = () => {
     setSelectedProgram(null);
@@ -137,12 +137,7 @@ export default function ProgramsClientPage({
           open={formDialogOpen}
           onOpenChange={setFormDialogOpen}
           program={selectedProgram}
-          institutionId={
-            selectedProgram?.institutionId ||
-            (selectedInstitutionId !== "all"
-              ? selectedInstitutionId
-              : institutions[0]?.id || "")
-          }
+          departmentId={selectedProgram?.departmentId || ""}
           onSubmit={handleFormSubmit}
         />
       )}

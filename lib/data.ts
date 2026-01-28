@@ -1,6 +1,6 @@
 
 import { PrismaClient } from '@prisma/client';
-import { Institution, Shift, Program, Department, Teacher } from './types';
+import { Institution, Shift, Program, Department, Teacher, Student, Batch } from './types';
 
 const prisma = new PrismaClient();
 
@@ -12,10 +12,10 @@ export async function getInstitutions(): Promise<Institution[]> {
     const institutions = await prisma.institution.findMany({
         include: {
             shifts: true,
-            programs: true,
             departments: {
                 include: {
                     teachers: true,
+                    programs: true,
                 },
             },
         },
@@ -28,10 +28,10 @@ export async function getInstitutionById(id: string): Promise<Institution | null
         where: { id },
         include: {
             shifts: true,
-            programs: true,
             departments: {
                 include: {
                     teachers: true,
+                    programs: true,
                 },
             },
         },
@@ -43,6 +43,7 @@ export async function getDepartments(): Promise<Department[]> {
     const departments = await prisma.department.findMany({
         include: {
             teachers: true,
+            programs: true,
         },
     });
     return departments;
@@ -53,6 +54,7 @@ export async function getDepartmentById(id: string): Promise<Department | null> 
         where: { id },
         include: {
             teachers: true,
+            programs: true,
         },
     });
     return department;
@@ -99,4 +101,75 @@ export function getTeachersByDepartment(departmentId: string): Promise<Teacher[]
         where: { departmentId },
     });
     return teachers;
+}
+
+export async function getTotalStudents(): Promise<number> {
+    return await prisma.student.count();
+}
+
+export async function getStudentsByDepartmentCount(departmentId: string): Promise<number> {
+    return await prisma.student.count({
+        where: {
+            batch: {
+                program: {
+                    departmentId: departmentId
+                }
+            }
+        }
+    });
+}
+
+export async function getProgramsByDepartment(departmentId: string): Promise<Program[]> {
+    return await prisma.program.findMany({
+        where: { departmentId },
+    });
+}
+
+export async function getBatchesByDepartment(departmentId: string): Promise<Batch[]> {
+    return await prisma.batch.findMany({
+        where: {
+            program: {
+                departmentId: departmentId,
+            },
+        },
+        include: {
+            program: true,
+        },
+    });
+}
+
+export async function getStudentsByDepartment(departmentId: string): Promise<Student[]> {
+    return await prisma.student.findMany({
+        where: {
+            batch: {
+                program: {
+                    departmentId: departmentId,
+                },
+            },
+        },
+        include: {
+            batch: {
+                include: {
+                    program: true,
+                },
+            },
+        },
+    });
+}
+
+export async function getSubjects(institutionId: string) {
+    return await prisma.subject.findMany({
+        where: { institutionId },
+        orderBy: { code: 'asc' },
+    });
+}
+
+export async function getProgramCurriculum(programId: string) {
+    return await prisma.programSubject.findMany({
+        where: { programId },
+        include: {
+            subject: true,
+        },
+        orderBy: { termNumber: 'asc' },
+    });
 }

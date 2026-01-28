@@ -148,6 +148,7 @@ export default function DepartmentDetailClientPage({
         onOpenChange={setFormDialogOpen}
         teacher={selectedTeacher}
         departmentId={department.id}
+        institutionId={department.institutionId}
         onSubmit={handleFormSubmit}
       />
 

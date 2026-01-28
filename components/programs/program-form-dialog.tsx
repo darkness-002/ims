@@ -30,7 +30,7 @@ interface ProgramFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   program?: Program | null;
-  institutionId: string;
+  departmentId: string;
   onSubmit: (data: ProgramInput) => void;
 }
 
@@ -38,7 +38,7 @@ export function ProgramFormDialog({
   open,
   onOpenChange,
   program,
-  institutionId,
+  departmentId,
   onSubmit,
 }: ProgramFormDialogProps) {
   const isEditing = !!program;
@@ -46,14 +46,15 @@ export function ProgramFormDialog({
   const form = useForm<ProgramInput>({
     defaultValues: {
       name: program?.name || "",
-      type: program?.type || "UNDERGRADUATE",
+      type: program?.type || "SEMESTER_BASED",
       code: program?.code || "",
-      institutionId,
+      duration: program?.duration || 8,
+      departmentId: departmentId,
     },
   });
 
   const handleSubmit = (data: ProgramInput) => {
-    onSubmit({ ...data, institutionId });
+    onSubmit({ ...data, departmentId });
     form.reset();
     onOpenChange(false);
   };
@@ -90,10 +91,9 @@ export function ProgramFormDialog({
               <FormField
                 control={form.control}
                 name="type"
-                rules={{ required: "Type is required" }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Type *</FormLabel>
+                    <FormLabel>Program Type</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -104,10 +104,12 @@ export function ProgramFormDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="UNDERGRADUATE">
-                          Undergraduate
+                        <SelectItem value="SEMESTER_BASED">
+                          Semester Based
                         </SelectItem>
-                        <SelectItem value="GRADUATE">Graduate</SelectItem>
+                        <SelectItem value="ANNUAL_BASED">
+                          Annual Based
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

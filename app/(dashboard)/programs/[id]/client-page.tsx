@@ -2,21 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, GraduationCap, Building2, Pencil } from "lucide-react";
+import { ArrowLeft, GraduationCap, Building2, Pencil, BookOpen, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Program, ProgramInput, Institution } from "@/lib/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Program, ProgramInput, Institution, Subject } from "@/lib/types";
 import { ProgramFormDialog } from "@/components/programs";
+import { ProgramCurriculum } from "@/components/programs/program-curriculum";
 import { updateProgram } from "@/lib/actions/programs";
 
 interface ProgramDetailClientPageProps {
   program: Program;
   institution: Institution | null;
+  curriculum: any[]; // Using any to avoid complex type import for now
+  allSubjects: Subject[];
 }
 
 export default function ProgramDetailClientPage({
   program,
   institution,
+  curriculum,
+  allSubjects,
 }: ProgramDetailClientPageProps) {
   const [formDialogOpen, setFormDialogOpen] = useState(false);
 
@@ -51,41 +57,31 @@ export default function ProgramDetailClientPage({
           <div className="flex items-center gap-3">
             <div
               className={`rounded-lg p-2 ${
-                program.type === "GRADUATE"
+                program.type === "SEMESTER_BASED"
                   ? "bg-purple-100"
                   : "bg-blue-100"
               }`}
             >
-              <GraduationCap
-                className={`h-6 w-6 ${
-                  program.type === "GRADUATE"
-                    ? "text-purple-600"
-                    : "text-blue-600"
-                }`}
-              />
+              {program.type === "SEMESTER_BASED" ? (
+                <GraduationCap
+                  className={`h-6 w-6 ${
+                    program.type === "SEMESTER_BASED"
+                      ? "text-purple-600"
+                      : "text-blue-600"
+                  }`}
+                />
+              ) : (
+                <BookOpen className="h-6 w-6 text-blue-600" />
+              )}
             </div>
             <div>
               <h1 className="text-2xl font-bold">{program.name}</h1>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <span
-                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    program.type === "GRADUATE"
-                      ? "bg-purple-100 text-purple-800"
-                      : "bg-blue-100 text-blue-800"
-                  }`}
-                >
-                  {program.type === "GRADUATE" ? "Graduate" : "Undergraduate"}
-                </span>
-                {institution && (
-                  <Link
-                    href={`/institutions/${institution.id}`}
-                    className="flex items-center gap-1 text-sm hover:underline"
-                  >
-                    <Building2 className="h-3 w-3" />
-                    {institution.name}
-                  </Link>
-                )}
-              </div>
+              <p className="text-muted-foreground">
+                {program.code ? `${program.code} • ` : ""}
+                {program.type === "SEMESTER_BASED"
+                  ? "Semester Based"
+                  : "Annual Based"}
+              </p>
             </div>
           </div>
         </div>
@@ -95,90 +91,121 @@ export default function ProgramDetailClientPage({
         </Button>
       </div>
 
-      {/* Program Details Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Program Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 md:grid-cols-2">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">
-                Program Name
-              </label>
-              <p className="mt-1 font-medium">{program.name}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">
-                Program Code
-              </label>
-              <p className="mt-1">
-                {program.code ? (
-                  <span className="rounded bg-muted px-2 py-1 text-sm font-medium">
-                    {program.code}
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground">Not specified</span>
-                )}
-              </p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">
-                Program Type
-              </label>
-              <p className="mt-1">
-                <span
-                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    program.type === "GRADUATE"
-                      ? "bg-purple-100 text-purple-800"
-                      : "bg-blue-100 text-blue-800"
-                  }`}
-                >
-                  {program.type === "GRADUATE" ? "Graduate" : "Undergraduate"}
-                </span>
-              </p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">
-                Institution
-              </label>
-              <p className="mt-1">
-                {institution ? (
-                  <Link
-                    href={`/institutions/${institution.id}`}
-                    className="text-primary hover:underline"
-                  >
-                    {institution.name}
-                  </Link>
-                ) : (
-                  <span className="text-muted-foreground">Unknown</span>
-                )}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="details" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="details" className="gap-2">
+            <BookOpen className="h-4 w-4" />
+            Details
+          </TabsTrigger>
+          <TabsTrigger value="curriculum" className="gap-2">
+            <Layers className="h-4 w-4" />
+            Curriculum
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Note about Programs */}
-      <Card className="border-dashed">
-        <CardContent className="pt-6">
-          <p className="text-sm text-.muted-foreground text-center">
-            Programs are standalone entities. They don&apos;t contain departments or
-            other nested data. Use the{" "}
-            <Link href={`/institutions/${program.institutionId}`} className="text-primary hover:underline">
-              Institution page
-            </Link>{" "}
-            to manage related departments and shifts.
-          </p>
-        </CardContent>
-      </Card>
+        <TabsContent value="details" className="space-y-6">
+          {/* Program Details Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Program Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Program Name
+                  </label>
+                  <p className="mt-1 font-medium">{program.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Program Code
+                  </label>
+                  <p className="mt-1">
+                    {program.code ? (
+                      <span className="rounded bg-muted px-2 py-1 text-sm font-medium">
+                        {program.code}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">Not specified</span>
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Program Type
+                  </label>
+                  <p className="mt-1">
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        program.type === "SEMESTER_BASED"
+                          ? "bg-purple-100 text-purple-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
+                    >
+                      {program.type === "SEMESTER_BASED" ? "Semester Based" : "Annual Based"}
+                    </span>
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Duration
+                  </label>
+                  <p className="mt-1">
+                    {program.duration} {program.type === "SEMESTER_BASED" ? "Semesters" : "Years"}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Institution
+                  </label>
+                  <p className="mt-1">
+                    {institution ? (
+                      <Link
+                        href={`/institutions/${institution.id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {institution.name}
+                      </Link>
+                    ) : (
+                      <span className="text-muted-foreground">Unknown</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Note about Programs */}
+          <Card className="border-dashed">
+            <CardContent className="pt-6">
+              <p className="text-sm text-.muted-foreground text-center">
+                Programs are standalone entities. They don&apos;t contain departments or
+                other nested data. Use the{" "}
+                <Link href={`/institutions/${institution?.id}`} className="text-primary hover:underline">
+                  Institution page
+                </Link>{" "}
+                to manage related departments and shifts.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="curriculum">
+          <ProgramCurriculum 
+            program={program} 
+            curriculum={curriculum} 
+            allSubjects={allSubjects} 
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* Edit Dialog */}
       <ProgramFormDialog
         open={formDialogOpen}
         onOpenChange={setFormDialogOpen}
         program={program}
-        institutionId={program.institutionId}
+        departmentId={program.departmentId}
         onSubmit={handleFormSubmit}
       />
     </div>

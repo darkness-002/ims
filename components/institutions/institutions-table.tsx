@@ -70,7 +70,10 @@ export function InstitutionsTable({
                 {institution.departments?.length || 0}
               </TableCell>
               <TableCell className="text-center">
-                {institution.programs?.length || 0}
+                {institution.departments?.reduce(
+                  (acc, d) => acc + (d.programs?.length || 0),
+                  0
+                ) || 0}
               </TableCell>
               <TableCell>
                 <DropdownMenu>

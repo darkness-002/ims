@@ -69,15 +69,19 @@ export function ProgramsTable({
                   )}
                 </TableCell>
                 <TableCell>
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      program.type === "GRADUATE"
-                        ? "bg-purple-100 text-purple-800"
-                        : "bg-blue-100 text-blue-800"
-                    }`}
-                  >
-                    {program.type === "GRADUATE" ? "Graduate" : "Undergraduate"}
-                  </span>
+                  
+                                    <span
+                                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                        program.type === "SEMESTER_BASED"
+                                          ? "bg-purple-100 text-purple-800"
+                                          : "bg-blue-100 text-blue-800"
+                                      }`}
+                                    >
+                                      {program.type === "SEMESTER_BASED"
+                                        ? "Semester"
+                                        : "Annual"}
+                                    </span>
+                  
                 </TableCell>
                 <TableCell>
                   {program.code ? (

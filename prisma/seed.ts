@@ -37,16 +37,6 @@ async function main() {
     ],
   });
 
-  // Seed Programs
-  await prisma.program.createMany({
-    data: [
-      { name: 'Bachelor of Science in Computer Science', type: ProgramType.UNDERGRADUATE, code: 'BSCS', institutionId: institution1.id },
-      { name: 'Master of Science in Computer Science', type: ProgramType.GRADUATE, code: 'MSCS', institutionId: institution1.id },
-      { name: 'Bachelor of Business Administration', type: ProgramType.UNDERGRADUATE, code: 'BBA', institutionId: institution2.id },
-      { name: 'Master of Business Administration', type: ProgramType.GRADUATE, code: 'MBA', institutionId: institution2.id },
-    ],
-  });
-
   // Seed Departments
   const dept1 = await prisma.department.create({
     data: {
@@ -72,7 +62,7 @@ async function main() {
     },
   });
 
-  await prisma.department.create({
+  const deptBA = await prisma.department.create({
     data: {
         name: 'Business Administration',
         code: 'BA',
@@ -80,13 +70,23 @@ async function main() {
     },
   });
 
+  // Seed Programs
+  await prisma.program.createMany({
+    data: [
+      { name: 'Bachelor of Science in Computer Science', type: ProgramType.SEMESTER_BASED, code: 'BSCS', duration: 8, departmentId: dept1.id },
+      { name: 'Master of Science in Computer Science', type: ProgramType.SEMESTER_BASED, code: 'MSCS', duration: 4, departmentId: dept1.id },
+      { name: 'Bachelor of Business Administration', type: ProgramType.SEMESTER_BASED, code: 'BBA', duration: 8, departmentId: deptBA.id },
+      { name: 'Master of Business Administration', type: ProgramType.SEMESTER_BASED, code: 'MBA', duration: 4, departmentId: deptBA.id },
+    ],
+  });
+
   // Seed Teachers
   await prisma.teacher.createMany({
     data: [
-      { firstName: 'John', lastName: 'Smith', email: 'john.smith@university.edu', phone: '+1-555-0101', departmentId: dept1.id },
-      { firstName: 'Sarah', lastName: 'Johnson', email: 'sarah.johnson@university.edu', phone: '+1-555-0102', departmentId: dept1.id },
-      { firstName: 'Michael', lastName: 'Williams', email: 'michael.williams@university.edu', phone: '+1-555-0103', departmentId: dept2.id },
-      { firstName: 'Emily', lastName: 'Brown', email: 'emily.brown@university.edu', phone: '+1-555-0104', departmentId: dept3.id },
+      { firstName: 'John', lastName: 'Smith', email: 'john.smith@university.edu', phone: '+1-555-0101', departmentId: dept1.id, institutionId: institution1.id },
+      { firstName: 'Sarah', lastName: 'Johnson', email: 'sarah.johnson@university.edu', phone: '+1-555-0102', departmentId: dept1.id, institutionId: institution1.id },
+      { firstName: 'Michael', lastName: 'Williams', email: 'michael.williams@university.edu', phone: '+1-555-0103', departmentId: dept2.id, institutionId: institution1.id },
+      { firstName: 'Emily', lastName: 'Brown', email: 'emily.brown@university.edu', phone: '+1-555-0104', departmentId: dept3.id, institutionId: institution1.id },
     ],
   });
 

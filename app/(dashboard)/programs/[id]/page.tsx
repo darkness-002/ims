@@ -1,5 +1,7 @@
 
-import { getProgramById, getInstitutionById } from '@/lib/data';
+
+
+import { getProgramById, getInstitutionById, getDepartmentById, getProgramCurriculum, getSubjects } from '@/lib/data';
 import ProgramDetailClientPage from './client-page';
 
 interface ProgramDetailPageProps {
@@ -10,6 +12,7 @@ interface ProgramDetailPageProps {
 
 export default async function ProgramDetailPage({ params }: ProgramDetailPageProps) {
   const program = await getProgramById(params.id);
+
   if (!program) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -18,12 +21,22 @@ export default async function ProgramDetailPage({ params }: ProgramDetailPagePro
     );
   }
 
-  const institution = await getInstitutionById(program.institutionId);
+  // Fetch Department to get Institution ID
+  const department = await getDepartmentById(program.departmentId);
+  const institution = department ? await getInstitutionById(department.institutionId) : null;
+  
+  // Fetch Curriculum and Subjects
+  const curriculum = await getProgramCurriculum(program.id);
+  const allSubjects = institution ? await getSubjects(institution.id) : [];
 
   return (
     <ProgramDetailClientPage
       program={program}
       institution={institution}
+      curriculum={curriculum}
+      allSubjects={allSubjects}
     />
   );
 }
+
+
