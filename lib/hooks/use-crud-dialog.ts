@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 
-/**
- * Generic hook for managing CRUD dialogs
- */
+
 export function useCrudDialog<T>() {
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -49,3 +47,4 @@ export function useCrudDialog<T>() {
     closeDeleteDialog,
   };
 }
+export default useCrudDialog;
