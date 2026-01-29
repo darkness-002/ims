@@ -16,11 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  createDepartment,
-  updateDepartment,
-  deleteDepartment,
-} from "@/app/actions/departments";
+import { useDepartment } from "@/lib/hooks/use-department";
 
 interface DepartmentsClientPageProps {
   departments: (Department & { institutionName: string })[];
@@ -33,6 +29,8 @@ export default function DepartmentsClientPage({
 }: DepartmentsClientPageProps) {
   const [selectedInstitutionId, setSelectedInstitutionId] =
     useState<string>("all");
+
+  const { create, update, remove } = useDepartment();
 
   // Dialog states
   const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -63,15 +61,16 @@ export default function DepartmentsClientPage({
 
   const handleFormSubmit = async (data: DepartmentInput) => {
     if (selectedDepartment) {
-      await updateDepartment(selectedDepartment.id, data);
+      await update(selectedDepartment.id, data);
     } else {
-      await createDepartment(data);
+      await create(data);
     }
+    setFormDialogOpen(false);
   };
 
   const handleConfirmDelete = async () => {
     if (selectedDepartment) {
-      await deleteDepartment(selectedDepartment.id);
+      await remove(selectedDepartment.id);
       setDeleteDialogOpen(false);
       setSelectedDepartment(null);
     }

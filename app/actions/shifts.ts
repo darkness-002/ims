@@ -7,8 +7,7 @@ import { shiftService } from "@/lib/services/shift.service";
 
 export async function createShift(data: ShiftInput) {
   try {
-    const validated = shiftSchema.parse(data);
-    await shiftService.createShift(validated);
+    await shiftService.createShift(data);
     revalidatePath("/shifts");
     return { success: true };
   } catch (error) {
@@ -22,8 +21,7 @@ export async function createShift(data: ShiftInput) {
 
 export async function updateShift(id: string, data: ShiftInput) {
   try {
-    const validated = shiftSchema.parse(data);
-    await shiftService.updateShift(id, validated);
+    await shiftService.updateShift(id, data);
     revalidatePath("/shifts");
     return { success: true };
   } catch (error) {

@@ -5,9 +5,6 @@ import { revalidatePath } from 'next/cache';
 import { ProgramInput } from '@/lib/types';
 import { programService } from '@/lib/services/program.service';
 
-// ============================================================================
-// SERVER ACTIONS
-// ============================================================================
 
 export async function createProgram(data: ProgramInput) {
   try {

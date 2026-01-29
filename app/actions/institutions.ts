@@ -7,10 +7,7 @@ import { institutionService } from "@/lib/services/institution.service";
 
 export async function createInstitution(data: InstitutionInput) {
   try {
-    // Validate input
-    const validated = institutionSchema.parse(data);
-    
-    await institutionService.createInstitution(validated);
+    await institutionService.createInstitution(data);
     revalidatePath("/institutions");
     return { success: true };
   } catch (error) {
@@ -24,9 +21,7 @@ export async function createInstitution(data: InstitutionInput) {
 
 export async function updateInstitution(id: string, data: InstitutionInput) {
   try {
-    const validated = institutionSchema.parse(data);
-    
-    await institutionService.updateInstitution(id, validated);
+    await institutionService.updateInstitution(id, data);
     revalidatePath("/institutions");
     revalidatePath(`/institutions/${id}`);
     return { success: true };

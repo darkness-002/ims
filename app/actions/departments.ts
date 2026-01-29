@@ -7,9 +7,7 @@ import { departmentService } from "@/lib/services/department.service";
 
 export async function createDepartment(data: DepartmentInput) {
   try {
-    const validated = departmentSchema.parse(data);
-    
-    await departmentService.createDepartment(validated);
+    await departmentService.createDepartment(data);
     revalidatePath("/departments");
     revalidatePath(`/institutions/${data.institutionId}`);
     return { success: true };
@@ -24,9 +22,7 @@ export async function createDepartment(data: DepartmentInput) {
 
 export async function updateDepartment(id: string, data: DepartmentInput) {
   try {
-    const validated = departmentSchema.parse(data);
-    
-    await departmentService.updateDepartment(id, validated);
+    await departmentService.updateDepartment(id, data);
     revalidatePath("/departments");
     revalidatePath(`/institutions/${data.institutionId}`);
     return { success: true };

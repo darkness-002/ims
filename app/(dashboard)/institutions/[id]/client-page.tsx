@@ -27,6 +27,8 @@ import {
 // Component imports
 import { ShiftFormDialog, ShiftsTable } from "@/components/shifts";
 import { DepartmentFormDialog, DepartmentsTable } from "@/components/departments";
+import { useShift } from "@/lib/hooks/use-shift";
+import { useDepartment } from "@/lib/hooks/use-department";
 
 interface InstitutionDetailClientPageProps {
   institution: Institution;
@@ -34,10 +36,18 @@ interface InstitutionDetailClientPageProps {
 
 export default function InstitutionDetailClientPage({ institution }: InstitutionDetailClientPageProps) {
   const router = useRouter();
-
-  // Data state (initialized from props)
-  const [shifts, setShifts] = useState<Shift[]>(institution.shifts || []);
-  const [departments, setDepartments] = useState<Department[]>(institution.departments || []);
+  
+  const { 
+    create: createShift, 
+    update: updateShift, 
+    remove: removeShift 
+  } = useShift();
+  
+  const { 
+    create: createDepartment, 
+    update: updateDepartment, 
+    remove: removeDepartment 
+  } = useDepartment();
 
   // Dialog states
   const [shiftDialogOpen, setShiftDialogOpen] = useState(false);
@@ -50,6 +60,8 @@ export default function InstitutionDetailClientPage({ institution }: Institution
   const [deleteType, setDeleteType] = useState<"shift" | "department" | null>(null);
 
   const institutionId = institution.id;
+  const shifts = institution.shifts || [];
+  const departments = institution.departments || [];
 
   // Shift handlers
   const handleCreateShift = () => {
@@ -68,22 +80,13 @@ export default function InstitutionDetailClientPage({ institution }: Institution
     setDeleteDialogOpen(true);
   };
 
-  const handleShiftSubmit = (data: ShiftInput) => {
+  const handleShiftSubmit = async (data: ShiftInput) => {
     if (selectedShift) {
-      setShifts((prev) =>
-        prev.map((s) =>
-          s.id === selectedShift.id ? { ...s, ...data, updatedAt: new Date() } : s
-        )
-      );
+      await updateShift(selectedShift.id, data);
     } else {
-      const newShift: Shift = {
-        id: `shift-${Date.now()}`,
-        ...data,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      setShifts((prev) => [...prev, newShift]);
+      await createShift(data);
     }
+    setShiftDialogOpen(false);
   };
 
   // Department handlers
@@ -103,33 +106,21 @@ export default function InstitutionDetailClientPage({ institution }: Institution
     setDeleteDialogOpen(true);
   };
 
-  const handleDepartmentSubmit = (data: DepartmentInput) => {
+  const handleDepartmentSubmit = async (data: DepartmentInput) => {
     if (selectedDepartment) {
-      setDepartments((prev) =>
-        prev.map((d) =>
-          d.id === selectedDepartment.id
-            ? { ...d, ...data, updatedAt: new Date() }
-            : d
-        )
-      );
+      await updateDepartment(selectedDepartment.id, data);
     } else {
-      const newDepartment: Department = {
-        id: `dept-${Date.now()}`,
-        ...data,
-        teachers: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      setDepartments((prev) => [...prev, newDepartment]);
+      await createDepartment(data);
     }
+    setDepartmentDialogOpen(false);
   };
 
   // Confirm delete
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deleteType === "shift" && selectedShift) {
-      setShifts((prev) => prev.filter((s) => s.id !== selectedShift.id));
+      await removeShift(selectedShift.id);
     } else if (deleteType === "department" && selectedDepartment) {
-      setDepartments((prev) => prev.filter((d) => d.id !== selectedDepartment.id));
+      await removeDepartment(selectedDepartment.id);
     }
     setDeleteDialogOpen(false);
     setSelectedShift(null);
